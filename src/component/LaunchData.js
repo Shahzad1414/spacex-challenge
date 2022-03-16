@@ -7,6 +7,7 @@ import "react-date-range/dist/styles.css"; // main style file
 import "react-date-range/dist/theme/default.css"; // theme css file
 import { DateRangePicker } from "react-date-range";
 import axios from "axios";
+import "./launch.css";
 import { useQuery } from "react-query";
 const initialState = {
   loading: true,
@@ -43,6 +44,11 @@ function LaunchData() {
   const [enddate, setEndDate] =
     useState("2017-06-25");
 
+  const [state, dispatch] = useReducer(
+    reducer,
+    initialState
+  );
+
   const handleSelect = (ranges) => {
     setStartDate(
       ranges.selection.startDate
@@ -55,12 +61,6 @@ function LaunchData() {
         .slice(0, 10)
     );
   };
-
-  const [state, dispatch] = useReducer(
-    reducer,
-    initialState
-  );
-
   useEffect(() => {
     axios
       .get(
@@ -89,8 +89,8 @@ function LaunchData() {
         </div>
         <div class="mx-auto">
           <table
+            id="customers"
             class="table-auto"
-            style={{ width: "100%" }}
           >
             <thead>
               <tr>
