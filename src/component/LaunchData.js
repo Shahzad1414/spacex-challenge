@@ -1,7 +1,11 @@
 import React, {
   useReducer,
+  useState,
   useEffect,
 } from "react";
+import "react-date-range/dist/styles.css"; // main style file
+import "react-date-range/dist/theme/default.css"; // theme css file
+import { DateRangePicker } from "react-date-range";
 import axios from "axios";
 import { useQuery } from "react-query";
 const initialState = {
@@ -28,17 +32,39 @@ const reducer = (state, action) => {
       return state;
   }
 };
-
+const selectionRange = {
+  startDate: new Date(),
+  endDate: new Date(),
+  key: "selection",
+};
 function LaunchData() {
+  const [startdate, setStartDate] =
+    useState("2017-06-22");
+  const [enddate, setEndDate] =
+    useState("2017-06-25");
+
+  const handleSelect = (ranges) => {
+    setStartDate(
+      ranges.selection.startDate
+        .toISOString()
+        .slice(0, 10)
+    );
+    setEndDate(
+      ranges.selection.endDate
+        .toISOString()
+        .slice(0, 10)
+    );
+  };
+
   const [state, dispatch] = useReducer(
     reducer,
     initialState
   );
 
-  const { data } = useQuery("allLaunches", () => {
+  useEffect(() => {
     axios
       .get(
-        "https://api.spacexdata.com/v3/launches?start=2017-06-22&end=2017-06-25"
+        `https://api.spacexdata.com/v3/launches?start=${startdate}&end=${enddate}`
       )
       .then((response) => {
         dispatch({
@@ -51,13 +77,76 @@ function LaunchData() {
           type: "FETCH_ERROR",
         });
       });
-  });
+  }, []);
   return (
-    <div>
-      {state.loading
-        ? "Loading"
-        : state.post.mission_name}
-      {state.error ? state.error : null}
+    <div class="container mx-auto px-4 py-4">
+      <div class="grid grid-cols-1">
+        <div class="mx-auto">
+          <DateRangePicker
+            ranges={[selectionRange]}
+            onChange={handleSelect}
+          />
+        </div>
+        <div class="mx-auto">
+          <table
+            class="table-auto"
+            style={{ width: "100%" }}
+          >
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Date</th>
+                <th>Launch_Success</th>
+                <th>Detail</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  {state.loading
+                    ? "Loading"
+                    : state.post.mission_name
+                    ? state.post.mission_name
+                    : null}
+                  {state.error
+                    ? state.error
+                    : null}
+                </td>
+                <td>
+                  {state.loading
+                    ? "Loading"
+                    : state.post.launch_date_local
+                    ? state.post.launch_date_local
+                    : null}
+                  {state.error
+                    ? state.error
+                    : null}
+                </td>
+                <td>
+                  {state.loading
+                    ? "Loading"
+                    : state.post.launch_success
+                    ? state.post.launch_success
+                    : null}
+                  {state.error
+                    ? state.error
+                    : null}
+                </td>
+                <td>
+                  {state.loading
+                    ? "Loading"
+                    : state.post.details
+                    ? state.post.details
+                    : null}
+                  {state.error
+                    ? state.error
+                    : null}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }
